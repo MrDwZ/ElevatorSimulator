@@ -1,50 +1,74 @@
-from Ele import *
+import Ele
+from Tkinter import *
 
 
 class MainFrame(Frame):
-    _list = []
+    info_list = []
+    requests = []
+    error_label = None
+    from_entry = None
+    to_entry = None
 
-    def add_request(self, _from, _to, _text):
-        self._list.append('from {} to {}'.format(_from, _to))
+    @staticmethod
+    def update_model(req):
+        _from, _to = req
+        if _from > _to:
+            Ele.DOWN_TO[_to], Ele.DOWN_FROM[_from] = True, True
+        else:
+            Ele.UP_TO[_to], Ele.UP_FROM[_from] = True, True
+
+    def update_ui(self, _text):
         _text.configure(state='normal')
         _text.delete("1.0", END)
-        for item in self._list:
+        for item in self.info_list:
             _text.insert("1.0", item+"\n")
         _text.configure(state='disable')
 
+    def add_request(self, _from, _to, _text):
+        req = (_from, _to)
+
+        if req not in self.requests:
+            self.info_list.append('from {} to {}'.format(_from, _to))
+            self.requests.append(req)
+
+            self.update_model(req)
+            self.update_ui(_text)
+        else:
+            self.error_label['text'] = "Request Duplicated."
+
+        self.from_entry.delete(0, END)
+        self.to_entry.delete(0, END)
 
     def __init__(self, master):
 
         Frame.__init__(self, master=master)
-        input_form = Frame(master)
-        input_form.pack()
-        input_form.place(relx=0.05, rely=0.05, anchor=NW)
 
-        from_label = Label(input_form, text="FROM:")
-        from_label.pack(side=LEFT)
+        input_form = Frame(self)
+        Label(input_form, text="FROM:").grid(row=0, sticky=W)
+        self.from_entry = Entry(input_form)
+        self.from_entry.grid(row=0, column=1)
 
-        from_entry = Entry(input_form)
-        from_entry.pack(side=LEFT)
+        Label(input_form, text="TO:").grid(row=1, sticky=W)
+        self.to_entry = Entry(input_form)
+        self.to_entry.grid(row=1, column=1)
 
-        to_label = Label(input_form, text="TO:")
-        to_label.pack(side=LEFT)
+        input_form.grid(row=1, column=0, pady=20, sticky=W)
 
-        to_entry = Entry(input_form)
-        to_entry.pack(side=LEFT)
-
-
-        text = Text(master, width=40, height=40)
-        text.pack()
-        text.place(relx=0.05, rely=0.1, anchor=NW)
-        text.config(state=DISABLED)
-
-        confirm_button = Button(
+        Button(
             input_form,
             text="Confirm",
             command=lambda: self.add_request(
-                int(from_entry.get()),
-                int(to_entry.get()),
+                int(self.from_entry.get()),
+                int(self.to_entry.get()),
                 text
             )
-        )
-        confirm_button.pack(side=LEFT)
+        ).grid(row=2, column=0)
+
+        self.error_label = Label(input_form, fg="red")
+        self.error_label.grid(row=2, column=1)
+
+        text = Text(self, width=40, height=40)
+        text.grid(row=0, column=0)
+        text.config(state=DISABLED, highlightbackground="black")
+
+        self.place(relx=0.3, rely=0.5, anchor=CENTER)
