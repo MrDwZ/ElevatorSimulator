@@ -1,7 +1,6 @@
 from MainFrame import *
 
-
-
+REFRESH_RATE = 1000
 
 class Ele(Tk):
 

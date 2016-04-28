@@ -7,6 +7,7 @@ DOWN_TO = [0]*MAX_FLOOR_NUMBER
 MAX_FROM, MAX_TO = 0, 0
 UP, DOWN, IDLE = 0, 1, 2
 DIRECTION = IDLE
+REQUESTS = []
 
 
 def go_up():
@@ -22,7 +23,6 @@ def go_up():
 
 def go_down():
     global CURRENT_FLOOR
-    CURRENT_FLOOR -= 1
 
     if CURRENT_FLOOR == 1:
         return False
@@ -41,8 +41,41 @@ def call(_from, _to):
     MAX_FROM, MAX_TO = max(MAX_FROM, _from), max(MAX_TO, _to)
 
 
-def run():
-    while go_up():
-        pass
-    while go_down():
-        pass
+def has_from_request_from_upper_floor():
+    _from_list = [req[0] for req in REQUESTS]
+
+    if any(i > CURRENT_FLOOR for i in _from_list):
+        return True
+
+    return False
+
+def has_to_request_from_upper_floor():
+    _to_list = [req[1] for req in REQUESTS]
+
+    if any(i > CURRENT_FLOOR for i in _to_list):
+            return True
+
+    return False
+
+def has_from_request_from_lower_floor():
+    _from_list = [req[0] for req in REQUESTS]
+
+    if any(i < CURRENT_FLOOR for i in _from_list):
+        return True
+
+    return False
+
+
+def has_to_request_from_lower_floor():
+    _to_list = [req[1] for req in REQUESTS]
+
+    if any(i < CURRENT_FLOOR for i in _to_list):
+        return True
+
+    return False
+
+def move():
+    if DIRECTION == UP:
+        go_up()
+    elif DIRECTION == DOWN:
+        go_down()
