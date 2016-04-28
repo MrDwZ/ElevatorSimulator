@@ -39,11 +39,9 @@ class MainFrame(Frame):
         self.from_entry.delete(0, END)
         self.to_entry.delete(0, END)
 
-    def __init__(self, master):
-
-        Frame.__init__(self, master=master)
-
+    def init_left_info(self):
         input_form = Frame(self)
+
         Label(input_form, text="FROM:").grid(row=0, sticky=W)
         self.from_entry = Entry(input_form)
         self.from_entry.grid(row=0, column=1)
@@ -71,4 +69,56 @@ class MainFrame(Frame):
         text.grid(row=0, column=0)
         text.config(state=DISABLED, highlightbackground="black")
 
-        self.place(relx=0.3, rely=0.5, anchor=CENTER)
+        self.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+    def init_right_canvas(self, on_floor):
+        canvas = Canvas(self, width=285, height=550)
+        canvas.grid(row=0, column=1)
+
+        x, y = 20, 3
+        width, height = 160, 100
+
+        for i in xrange(0, 5):
+            _floor = 5-i
+            if _floor == on_floor:
+                canvas.create_rectangle(x, y+i*height, x+width, y+(i+1)*height)
+            else:
+                canvas.create_rectangle(x, y+i*height, x+width, y+(i+1)*height, fill="black")
+
+            text_x, text_y = x+width+20, (y+(i+0.5)*height)
+            canvas.create_text(
+                text_x, text_y,
+                text=_floor,
+                anchor="center",
+                font=("Helvatica", 24)
+            )
+
+    def init_indication_mark(self, status):
+        canvas = Canvas(self, width=150, height=70)
+        canvas.grid(row=0, column=1, sticky=SW, padx=20)
+
+        x, y = 10, 10
+        width, height = 40, 40
+        _text = ["IDLE", "UP", "DOWN"]
+
+        for i in xrange(0, 3):
+            if status == _text[i]:
+                canvas.create_rectangle(x, y, x+width, y+height, fill="black")
+            else:
+                canvas.create_rectangle(x, y, x+width, y+height)
+
+            canvas.create_text(
+                x+width/2,
+                y+height+10,
+                text=_text[i],
+                anchor="center",
+                font=("Helvatica", "14")
+            )
+            x = x + width + 10
+
+    def __init__(self, master):
+
+        Frame.__init__(self, master=master)
+        self.init_left_info()
+        self.init_right_canvas(1)
+        self.init_indication_mark("IDLE")
