@@ -1,5 +1,6 @@
 from Ele import *
 from Tkinter import *
+import Elevator
 
 
 class StartPage(Frame):
@@ -11,7 +12,7 @@ class StartPage(Frame):
     def set_floor_number(number):
 
         Ele.FLOOR_NUMBER = number
-        print(FLOOR_NUMBER)
+        print(Elevator.FLOOR_NUMBER)
 
     def __init__(self, master):
         Frame.__init__(self, master=master)

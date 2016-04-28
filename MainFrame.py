@@ -1,5 +1,6 @@
 import Ele
 from Tkinter import *
+import Elevator
 
 
 class MainFrame(Frame):
@@ -13,9 +14,9 @@ class MainFrame(Frame):
     def update_model(req):
         _from, _to = req
         if _from > _to:
-            Ele.DOWN_TO[_to], Ele.DOWN_FROM[_from] = True, True
+            Elevator.DOWN_TO[_to], Elevator.DOWN_FROM[_from] = True, True
         else:
-            Ele.UP_TO[_to], Ele.UP_FROM[_from] = True, True
+            Elevator.UP_TO[_to], Elevator.UP_FROM[_from] = True, True
 
     def update_ui(self, _text):
         _text.configure(state='normal')
@@ -71,15 +72,16 @@ class MainFrame(Frame):
 
         self.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-    def init_right_canvas(self, on_floor):
-        canvas = Canvas(self, width=285, height=550)
+    def init_right_canvas(self, on_floor, offset):
+        canvas = Canvas(self, width=285, height=570)
         canvas.grid(row=0, column=1)
 
         x, y = 20, 3
         width, height = 160, 100
+        lower, upper = offset/5 * 5, (offset/5 + 1) * 5
 
         for i in xrange(0, 5):
-            _floor = 5-i
+            _floor = upper-i
             if _floor == on_floor:
                 canvas.create_rectangle(x, y+i*height, x+width, y+(i+1)*height)
             else:
@@ -94,7 +96,7 @@ class MainFrame(Frame):
             )
 
     def init_indication_mark(self, status):
-        canvas = Canvas(self, width=150, height=70)
+        canvas = Canvas(self, width=150, height=60)
         canvas.grid(row=0, column=1, sticky=SW, padx=20)
 
         x, y = 10, 10
@@ -120,5 +122,5 @@ class MainFrame(Frame):
 
         Frame.__init__(self, master=master)
         self.init_left_info()
-        self.init_right_canvas(1)
+        self.init_right_canvas(1, 1)
         self.init_indication_mark("IDLE")
