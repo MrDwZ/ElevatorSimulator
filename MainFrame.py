@@ -72,7 +72,11 @@ class MainFrame(Frame):
         x, y = 20, 3
         width, height = 160, 100
         offset = on_floor / 5 * 5
+
         lower, upper = offset/5 * 5, (offset/5 + 1) * 5
+        if Elevator.CURRENT_FLOOR % 5 == 0:
+            lower -= 5
+            upper -= 5
 
         for i in xrange(0, 5):
             _floor = upper-i
@@ -120,29 +124,36 @@ class MainFrame(Frame):
     def next_scenario(self):
 
         # Decide the elevator's next direction when it is IDLE
-        if len(Elevator.REQUESTS) == 0:
+        if len(Elevator.REQUESTS) == 0 and len(Elevator.IN_ELEVATOR) == 0:
             Elevator.DIRECTION = Elevator.IDLE
         elif Elevator.DIRECTION == Elevator.IDLE:
             if Elevator.has_from_request_from_upper_floor():
                 Elevator.DIRECTION = Elevator.UP
-            elif Elevator.has_from_request_from_lower_floor():
-                Elevator.DIRECTION = Elevator.DOWN
             elif Elevator.has_to_request_from_upper_floor():
                 Elevator.DIRECTION = Elevator.UP
+            elif Elevator.has_from_request_from_lower_floor():
+                Elevator.DIRECTION = Elevator.DOWN
             elif Elevator.has_to_request_from_lower_floor():
                 Elevator.DIRECTION = Elevator.DOWN
 
+        print "In elevator", Elevator.IN_ELEVATOR
+        print "Requests", Elevator.REQUESTS
         Elevator.move()
 
         # Detect if there is anyone wanna embark the elevator on current floor
-        if any(req[0] == Elevator.CURRENT_FLOOR for req in Elevator.REQUESTS):
+        if any([req for req in Elevator.REQUESTS if req[0] == Elevator.CURRENT_FLOOR]):
+            temp = [req for req in Elevator.REQUESTS if req[0] == Elevator.CURRENT_FLOOR]
+            Elevator.REQUESTS = [req for req in Elevator.REQUESTS if req not in temp]
             Elevator.DIRECTION = Elevator.IDLE
+            if len(temp) > 0:
+                for req in temp:
+                    Elevator.IN_ELEVATOR.append(req)
 
         # Detect if there is anyone wanna disembark the elevator on current floor
-        if any(req[1] == Elevator.CURRENT_FLOOR for req in Elevator.REQUESTS):
-            Elevator.REQUESTS = \
-                [req for req in Elevator.REQUESTS if req[1] != Elevator.CURRENT_FLOOR]
+        if any([req for req in Elevator.IN_ELEVATOR if req[1] == Elevator.CURRENT_FLOOR]):
             Elevator.DIRECTION = Elevator.IDLE
+            Elevator.IN_ELEVATOR = \
+                [req for req in Elevator.IN_ELEVATOR if req[1] != Elevator.CURRENT_FLOOR]
 
         self.set_indicator(Elevator.DIRECTION)
         self.set_right_canvas(Elevator.CURRENT_FLOOR)

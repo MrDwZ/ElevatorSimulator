@@ -8,7 +8,7 @@ MAX_FROM, MAX_TO = 0, 0
 UP, DOWN, IDLE = 0, 1, 2
 DIRECTION = IDLE
 REQUESTS = []
-
+IN_ELEVATOR = []
 
 def go_up():
     global CURRENT_FLOOR
@@ -49,13 +49,15 @@ def has_from_request_from_upper_floor():
 
     return False
 
+
 def has_to_request_from_upper_floor():
-    _to_list = [req[1] for req in REQUESTS]
+    _to_list = [req[1] for req in IN_ELEVATOR]
 
     if any(i > CURRENT_FLOOR for i in _to_list):
             return True
 
     return False
+
 
 def has_from_request_from_lower_floor():
     _from_list = [req[0] for req in REQUESTS]
@@ -67,7 +69,7 @@ def has_from_request_from_lower_floor():
 
 
 def has_to_request_from_lower_floor():
-    _to_list = [req[1] for req in REQUESTS]
+    _to_list = [req[1] for req in IN_ELEVATOR]
 
     if any(i < CURRENT_FLOOR for i in _to_list):
         return True
