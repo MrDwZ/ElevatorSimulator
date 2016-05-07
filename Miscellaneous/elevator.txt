@@ -1,0 +1,84 @@
+var FLOOR = 2
+var D1 = 0
+var D2 = 0
+var D3 = 0
+CALLUP = bool[], CALLDOWN = bool[];
+QUEUE = queue[]
+enum STATE
+
+class User {
+    var IN, OUT, GIVEUPTIME, INTERTIME // Attribution of new comer.
+    var new_user
+    var wait_time = 0;
+
+    static void enter_and_prepare_successor(in, out, giveup, intertime)
+    {
+        IN = in
+        OUT = out
+        GIVEUPTIME = giveup
+        INTERTIME = intertime
+        new_user = User.new(//...)
+    }
+
+    static void signal_and_wait() 
+    {
+        if FLOOR == IN && Elevator.next_step().eql('prepare_to_move')
+            Elevator.cancel_current_step() //?
+            Elevator.run_step('open_the_door')
+        elsif D3 != 0 && FLOOR == IN
+            D3 = 0
+            D1 = 1;
+            Elevator.run_step('let_people_in_and_out')
+        else
+            if (OUT > IN) CALLUP[IN] = true;
+            if (OUT < IN) CALLDOWN[IN] = true
+            if !D2 || Elevator.current_step().eql('wait_for_call')
+                Decision.start()
+    }
+
+    static void enter_queue()
+    {
+        QUEUE[IN].push(new_user)
+
+        while !(Elevator.current_step().eql('let_people_in_and_out') &&
+                Elevator.next_step().eql('get_in')) {
+            wait_time++;
+
+            //'User.give_up()' will be invoke if elevator doesn't arrive first 
+            //Means 'Elevator.let_people_in_and_out' does not send user to 'User.get_in' and not cancel 'give_up'
+            if (wait_time == GIVEUPTIME) User.give_up()
+        }
+    }
+
+    static void give_up()
+    {
+        if FLOOR != IN || !D1
+            QUEUE[IN].delete(USER)
+    }
+    
+    //Will be invoked by Elevator.let_people_in_and_out
+    static void get_in()
+    {
+        Elevator.users.add(new_user)
+        QUEUE[IN].delete(new_user)
+        CALLCAR[OUT] = true;
+        if STATE = NEUTRAL
+            if OUT > IN STATE = GOINGUP
+            if OUT < IN STATE = GOINGDOWN
+            Elevator.wait(25)
+            Elevator.exec_step('close_the_door')
+    }
+
+    //Will be invoked by Elevator.let_people_in_and_out
+    static void get_out()
+    {
+        Elevator.users.delete(new_user)
+    }
+
+   static void run() 
+   {
+        enter_and_prepare_successor(in, out, giveup, intertime)
+        signal_and_wait()
+        enter_queue()
+   }
+}

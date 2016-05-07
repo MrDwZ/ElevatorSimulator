@@ -1,6 +1,7 @@
 import Ele
 from Tkinter import *
 import Elevator
+import time
 
 
 class MainFrame(Frame):
@@ -13,13 +14,13 @@ class MainFrame(Frame):
     main_canvas = None
 
     def add_request(self, _from, _to):
-        req = (_from, _to)
+        print _to
+        tmp = [int(x) for x in _to.split(',')]
+        for __to in tmp:
+            req = (_from, __to)
 
-        if req not in Elevator.REQUESTS:
-            self.info_list.append('from {} to {}'.format(_from, _to))
+            self.info_list.append('from {} to {}'.format(_from, __to))
             Elevator.REQUESTS.append(req)
-        else:
-            self.error_label['text'] = "Request Duplicated."
 
         self.from_entry.delete(0, END)
         self.to_entry.delete(0, END)
@@ -29,10 +30,15 @@ class MainFrame(Frame):
         for item in self.info_list:
             self.text.insert("1.0", item+"\n")
         self.text.configure(state='disable')
+
         Elevator.call(_from, _to)
 
     def init_left_info(self):
-        input_form = Frame(self)
+        # Create a variable named input_form
+        # The class of input_form is Frame
+        # The parent widget of input_form is MainFrame
+
+        input_form = Frame(master=self)
 
         Label(input_form, text="FROM:").grid(row=0, sticky=W)
         self.from_entry = Entry(input_form)
@@ -49,12 +55,14 @@ class MainFrame(Frame):
             text="Confirm",
             command=lambda: self.add_request(
                 int(self.from_entry.get()),
-                int(self.to_entry.get()),
+                self.to_entry.get()
             )
         ).grid(row=2, column=0)
 
+        """
         self.error_label = Label(input_form, fg="red")
         self.error_label.grid(row=2, column=1)
+        """
 
         self.text = Text(self, width=40, height=40)
         self.text.grid(row=0, column=0)
@@ -86,6 +94,7 @@ class MainFrame(Frame):
                 self.main_canvas.create_rectangle(x, y+i*height, x+width, y+(i+1)*height, fill="black")
 
             text_x, text_y = x+width+20, (y+(i+0.5)*height)
+
             self.main_canvas.create_text(
                 text_x, text_y,
                 text=_floor,
@@ -96,7 +105,7 @@ class MainFrame(Frame):
     def set_indicator(self, status):
 
         if self.indicator is None:
-            self.indicator = Canvas(self, width=150, height=60)
+            self.indicator = Canvas(self, width=150, height=70)
             self.indicator.grid(row=0, column=1, sticky=SW, padx=20)
         else:
             self.indicator.delete("all")
@@ -123,10 +132,12 @@ class MainFrame(Frame):
 
     def next_scenario(self):
 
+
         # Decide the elevator's next direction when it is IDLE
         if len(Elevator.REQUESTS) == 0 and len(Elevator.IN_ELEVATOR) == 0:
             Elevator.DIRECTION = Elevator.IDLE
         elif Elevator.DIRECTION == Elevator.IDLE:
+            time.sleep(2)
             if Elevator.has_from_request_from_upper_floor():
                 Elevator.DIRECTION = Elevator.UP
             elif Elevator.has_to_request_from_upper_floor():
@@ -136,8 +147,6 @@ class MainFrame(Frame):
             elif Elevator.has_to_request_from_lower_floor():
                 Elevator.DIRECTION = Elevator.DOWN
 
-        print "In elevator", Elevator.IN_ELEVATOR
-        print "Requests", Elevator.REQUESTS
         Elevator.move()
 
         # Detect if there is anyone wanna embark the elevator on current floor
@@ -163,6 +172,6 @@ class MainFrame(Frame):
 
         Frame.__init__(self, master=master)
         self.init_left_info()
-        self.set_right_canvas(1)
+        self.set_right_canvas(Elevator.CURRENT_FLOOR)
         self.set_indicator(Elevator.IDLE)
         self.after(Ele.REFRESH_RATE, lambda: self.next_scenario())
